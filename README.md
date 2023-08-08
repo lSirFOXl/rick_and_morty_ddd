@@ -1,3 +1,5 @@
+flutter pub run build_runner build
+
 # rick_and_morty_ddd
 
 A new Flutter project.

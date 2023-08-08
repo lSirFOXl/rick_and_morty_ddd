@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:rick_and_morty_ddd/features/characters/domain/entities/character_lite_entity.dart';
 import 'package:rick_and_morty_ddd/features/characters/presentation/widgets/character_list_item.dart';
 import 'package:rick_and_morty_ddd/features/characters/providers.dart';
 import 'package:rick_and_morty_ddd/features/common/presentation/widgets/app_error.dart';
@@ -15,50 +16,74 @@ class CharactersPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final characters = ref.watch(characterListControllerProvider);
+    final charactersController =
+        ref.read(characterListControllerProvider.notifier);
     final scrollController = ScrollController();
 
-    void setupScrollController(BuildContext context) {
-      scrollController.addListener(() {
-        if (scrollController.position.atEdge) {
-          if (scrollController.position.pixels != 0) {}
-        }
-      });
-    }
+    scrollController.addListener(() {
+      double maxScroll = scrollController.position.maxScrollExtent;
+      double currentScroll = scrollController.position.pixels;
+      double delta = MediaQuery.of(context).size.width * 0.20;
+      if (maxScroll - currentScroll <= delta) {
+        charactersController.getCharactersNext();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Characters',
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            characters.when(
-              data: (items) => Flexible(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ListView.separated(
-                    controller: scrollController,
-                    itemBuilder: (context, index) => CharacterListItemWidget(
-                        character: items.results[index]),
-                    separatorBuilder: (context, index) {
-                      return Divider(
-                        color: Colors.grey[400],
-                      );
-                    },
-                    itemCount: items.results.length,
-                    shrinkWrap: true,
-                  ),
-                ),
-              ),
-              error: (o, e) => AppError(
+      body: CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          characters.maybeWhen(
+            data: (items) => ItemsListBuilder(items: items),
+            onGoingLoading: (items) {
+              return ItemsListBuilder(
+                items: items,
+              );
+            },
+            error: (o, e) => SliverToBoxAdapter(
+              child: AppError(
                 title: o.toString(),
               ),
-              loading: () => CircularProgressIndicator(),
-            )
-          ],
-        ),
+            ),
+            loading: () => const SliverToBoxAdapter(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            orElse: () => const SliverToBoxAdapter(),
+          ),
+          characters.maybeWhen(
+            onGoingLoading: (items) => const SliverToBoxAdapter(),
+            onGoingError: (items, e, stk) => const SliverToBoxAdapter(),
+            orElse: () => const SliverToBoxAdapter(),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ItemsListBuilder extends StatelessWidget {
+  const ItemsListBuilder({
+    Key? key,
+    required this.items,
+  }) : super(key: key);
+
+  final List<CharacterLiteEntity> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          return CharacterListItemWidget(character: items[index]);
+        },
+        childCount: items.length,
       ),
     );
   }

@@ -18,9 +18,11 @@ class CharacterRepository implements CharacterRepositoryInterface {
   CharacterRepository({required this.client});
 
   @override
-  Future<Either<Failure, CharactersListEntity>> getCharacters() async {
+  Future<Either<Failure, CharactersListEntity>> getCharacters(
+      {required int page}) async {
     String url = "${AppConfigs().apiUrl}/character";
-    final response = await httpClentProvider.get(url);
+    final response =
+        await httpClentProvider.get(url, queryParameters: {"page": page});
 
     if (response.statusCode == 200) {
       return right(CharactersListEntity.fromJson(response.data));

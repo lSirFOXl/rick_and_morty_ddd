@@ -3,7 +3,8 @@ import 'package:dio/dio.dart';
 class DioInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('REQUEST[${options.method}] => PATH: ${options.path}');
+    print(
+        'REQUEST[${options.method}] => PATH: ${options.path}; PARAMS: ${options.queryParameters}');
     options.headers['content-Type'] = 'application/json';
     super.onRequest(options, handler);
   }
