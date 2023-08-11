@@ -1,3 +1,4 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:rick_and_morty_ddd/flavors.dart';
 
 import 'configs/providers.dart' as providers;
@@ -13,6 +14,9 @@ Future<ProviderContainer> bootstrap() async {
     observers: [if (F.appFlavor == Flavor.local) _Logger()],
   );
   await providers.initializeProviders(container);
+
+  await dotenv.load(fileName: '.env.${F.appFlavor?.name}');
+
   return container;
 }
 

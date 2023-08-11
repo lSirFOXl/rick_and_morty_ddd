@@ -1,7 +1,7 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:fpdart/fpdart.dart';
-import 'package:rick_and_morty_ddd/configs/app_configs.dart';
 import 'package:rick_and_morty_ddd/configs/providers.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/character_entity.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/characters_list_entity.dart';
@@ -17,7 +17,7 @@ class CharacterRepository implements CharacterRepositoryInterface {
   @override
   Future<Either<Failure, CharactersListEntity>> getCharacters(
       {required int page}) async {
-    String url = "${AppConfigs().apiUrl}/character";
+    String url = "${dotenv.env['API_URL']}/character";
     final response =
         await httpClentProvider.get(url, queryParameters: {"page": page});
 
@@ -31,7 +31,7 @@ class CharacterRepository implements CharacterRepositoryInterface {
   @override
   Future<Either<Failure, CharacterEntity>> getCharacter(
       {required int id}) async {
-    String url = "${AppConfigs().apiUrl}/character/$id";
+    String url = "${dotenv.env['API_URL']}/character/$id";
     final response = await httpClentProvider.get(url);
 
     if (response.statusCode == 200) {
