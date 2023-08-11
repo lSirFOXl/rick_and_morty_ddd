@@ -1,7 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:rick_and_morty_ddd/features/characters/presentation/pages/character_screen.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/character_lite_entity.dart';
 import 'package:rick_and_morty_ddd/features/characters/presentation/widgets/character_list_item.dart';
 import 'package:rick_and_morty_ddd/features/characters/providers.dart';
@@ -68,7 +68,7 @@ class CharactersPage extends ConsumerWidget {
   }
 }
 
-class ItemsListBuilder extends StatelessWidget {
+class ItemsListBuilder extends ConsumerWidget {
   const ItemsListBuilder({
     Key? key,
     required this.items,
@@ -77,11 +77,18 @@ class ItemsListBuilder extends StatelessWidget {
   final List<CharacterLiteEntity> items;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          return CharacterListItemWidget(character: items[index]);
+          var liteCharacter = items[index];
+          return GestureDetector(
+            onTap: () => context.goNamed(
+              CharacterScreen.routeName,
+              pathParameters: {'cid': liteCharacter.id.toString()},
+            ),
+            child: CharacterListItemWidget(character: liteCharacter),
+          );
         },
         childCount: items.length,
       ),

@@ -1,5 +1,5 @@
+import 'package:rick_and_morty_ddd/features/characters/presentation/pages/character_screen.dart';
 import 'package:rick_and_morty_ddd/features/characters/presentation/pages/characters_page.dart';
-import 'package:rick_and_morty_ddd/features/counter/presentation/screens/counter_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,10 +23,17 @@ import 'package:go_router/go_router.dart';
 final router = GoRouter(
   routes: [
     GoRoute(
-      path: '/',
-      name: CharactersPage.routeName,
-      builder: (context, state) => const CharactersPage(),
-    ),
+        path: '/',
+        name: CharactersPage.routeName,
+        builder: (context, state) => const CharactersPage(),
+        routes: [
+          GoRoute(
+            path: '${CharacterScreen.routePath}/:cid',
+            name: CharacterScreen.routeName,
+            builder: (context, state) =>
+                CharacterScreen(id: int.parse(state.pathParameters['cid']!)),
+          ),
+        ]),
   ],
   observers: [
     routeObserver,
