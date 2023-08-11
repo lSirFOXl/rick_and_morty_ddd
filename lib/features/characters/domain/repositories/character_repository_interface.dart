@@ -7,7 +7,7 @@ import 'package:rick_and_morty_ddd/features/common/domain/failures/failure.dart'
 abstract class CharacterRepositoryInterface {
   /// Get departments list
   Future<Either<Failure, CharactersListEntity>> getCharacters(
-      {required int page});
+      {required int page, required String name});
 
   Future<Either<Failure, CharacterEntity>> getCharacter({required int id});
 }

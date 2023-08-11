@@ -15,6 +15,7 @@ class CharactersListController
   }
 
   int page = 1;
+  String name = "";
 
   final CharacterRepositoryInterface _repository;
 
@@ -29,14 +30,21 @@ class CharactersListController
   }
 
   Future<void> getCharacters() async {
+    page = 1;
     state = const PaginationState.loading();
-    final res = await _repository.getCharacters(page: page);
+    final res = await _repository.getCharacters(page: page, name: name);
 
     res.fold((l) {
       state = PaginationState.error(l.toString(), StackTrace.current);
     }, (r) {
       updateData(r.results);
     });
+  }
+
+  Future<void> searchBy(String name) async {
+    this.name = name;
+    this._items.clear();
+    getCharacters();
   }
 
   Future<void> getCharactersNext() async {
@@ -50,7 +58,7 @@ class CharactersListController
 
     state = PaginationState.onGoingLoading(_items);
 
-    final res = await _repository.getCharacters(page: page);
+    final res = await _repository.getCharacters(page: page, name: name);
 
     res.fold((l) {
       state = PaginationState.error(l.toString(), StackTrace.current);

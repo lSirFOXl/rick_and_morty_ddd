@@ -16,10 +16,10 @@ class CharacterRepository implements CharacterRepositoryInterface {
 
   @override
   Future<Either<Failure, CharactersListEntity>> getCharacters(
-      {required int page}) async {
+      {required int page, required String name}) async {
     String url = "${dotenv.env['API_URL']}/character";
-    final response =
-        await httpClentProvider.get(url, queryParameters: {"page": page});
+    final response = await httpClentProvider
+        .get(url, queryParameters: {"page": page, "name": name});
 
     if (response.statusCode == 200) {
       return right(CharactersListEntity.fromJson(response.data));

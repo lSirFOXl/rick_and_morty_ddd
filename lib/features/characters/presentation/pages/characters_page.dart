@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,10 @@ import 'package:rick_and_morty_ddd/features/characters/domain/entities/character
 import 'package:rick_and_morty_ddd/features/characters/presentation/widgets/character_list_item.dart';
 import 'package:rick_and_morty_ddd/features/characters/providers.dart';
 import 'package:rick_and_morty_ddd/features/common/presentation/widgets/app_error.dart';
+
+final _searchBarStatus = StateProvider<bool>((ref) => false);
+final _searchEditingController = Provider.autoDispose<TextEditingController>(
+    (ref) => TextEditingController());
 
 class CharactersPage extends ConsumerWidget {
   const CharactersPage({super.key});
@@ -30,11 +36,7 @@ class CharactersPage extends ConsumerWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Characters',
-        ),
-      ),
+      appBar: const TitleBar(),
       body: CustomScrollView(
         controller: scrollController,
         slivers: [
@@ -94,4 +96,62 @@ class ItemsListBuilder extends ConsumerWidget {
       ),
     );
   }
+}
+
+class TitleBar extends ConsumerWidget implements PreferredSizeWidget {
+  const TitleBar({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchBarStatusProvider_r = ref.read(_searchBarStatus.notifier);
+    final searchBarStatusProvider_w = ref.watch(_searchBarStatus);
+
+    final searchEditingController = ref.watch(_searchEditingController);
+
+    final charactersController =
+        ref.read(characterListControllerProvider.notifier);
+
+    return AppBar(
+      title: searchBarStatusProvider_w
+          ? Container(
+              width: double.infinity,
+              height: 40,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(5)),
+              child: Center(
+                child: TextField(
+                  controller: searchEditingController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        searchEditingController.clear();
+                      },
+                    ),
+                    hintText: 'Search...',
+                    border: InputBorder.none,
+                  ),
+                  onSubmitted: (value) {
+                    charactersController.searchBy(value);
+                  },
+                ),
+              ),
+            )
+          : Text("Characters List"),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.search),
+          onPressed: () {
+            searchBarStatusProvider_r.state = !searchBarStatusProvider_r.state;
+          },
+        )
+      ],
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(60);
 }
