@@ -42,11 +42,8 @@ class CharactersPage extends ConsumerWidget {
         slivers: [
           characters.maybeWhen(
             data: (items) => ItemsListBuilder(items: items),
-            onGoingLoading: (items) {
-              return ItemsListBuilder(
-                items: items,
-              );
-            },
+            onGoingLoading: (items) => ItemsListBuilder(items: items),
+            noMoreData: (items) => ItemsListBuilder(items: items),
             error: (o, e) => SliverToBoxAdapter(
               child: AppError(
                 title: o.toString(),
@@ -59,10 +56,16 @@ class CharactersPage extends ConsumerWidget {
             ),
             orElse: () => const SliverToBoxAdapter(),
           ),
-          characters.maybeWhen(
-            onGoingLoading: (items) => const SliverToBoxAdapter(),
-            onGoingError: (items, e, stk) => const SliverToBoxAdapter(),
-            orElse: () => const SliverToBoxAdapter(),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 50,
+              child: characters.maybeWhen(
+                noMoreData: (items) => Text("No more data"),
+                onGoingLoading: (items) => const SizedBox(),
+                onGoingError: (items, e, stk) => const SizedBox(),
+                orElse: () => const SizedBox(),
+              ),
+            ),
           )
         ],
       ),
@@ -109,6 +112,7 @@ class TitleBar extends ConsumerWidget implements PreferredSizeWidget {
     final searchBarStatusProvider_w = ref.watch(_searchBarStatus);
 
     final searchEditingController = ref.watch(_searchEditingController);
+    final FocusNode searchEditingFocus = FocusNode();
 
     final charactersController =
         ref.read(characterListControllerProvider.notifier);
@@ -123,6 +127,7 @@ class TitleBar extends ConsumerWidget implements PreferredSizeWidget {
               child: Center(
                 child: TextField(
                   controller: searchEditingController,
+                  focusNode: searchEditingFocus,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: IconButton(
@@ -146,6 +151,7 @@ class TitleBar extends ConsumerWidget implements PreferredSizeWidget {
           icon: Icon(Icons.search),
           onPressed: () {
             searchBarStatusProvider_r.state = !searchBarStatusProvider_r.state;
+            searchEditingFocus.requestFocus();
           },
         )
       ],

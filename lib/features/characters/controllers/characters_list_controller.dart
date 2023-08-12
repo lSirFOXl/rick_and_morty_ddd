@@ -20,8 +20,11 @@ class CharactersListController
 
   final List<CharacterLiteEntity> _items = [];
 
-  void updateData(List<CharacterLiteEntity> result, bool isEnd) {
-    state = PaginationState.data(_items..addAll(result));
+  void updateData(List<CharacterLiteEntity> result, bool isLastPage) {
+    var targetFunction =
+        isLastPage ? PaginationState.noMoreData : PaginationState.data;
+
+    state = targetFunction(_items..addAll(result));
   }
 
   Future<void> getCharacters() async {
@@ -43,8 +46,8 @@ class CharactersListController
   }
 
   Future<void> getCharactersNext() async {
-    // state = const PaginationState.loading();
-    if (state == PaginationState<CharacterLiteEntity>.onGoingLoading(_items)) {
+    if (state == PaginationState<CharacterLiteEntity>.onGoingLoading(_items) ||
+        state == PaginationState<CharacterLiteEntity>.noMoreData(_items)) {
       log("Rejected");
       return;
     }
