@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/character_lite_entity.dart';
-import 'package:rick_and_morty_ddd/features/characters/domain/entities/characters_list_entity.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/repositories/character_repository_interface.dart';
 import 'package:rick_and_morty_ddd/features/common/domain/common/pagination_state.dart';
 
@@ -21,12 +20,8 @@ class CharactersListController
 
   final List<CharacterLiteEntity> _items = [];
 
-  void updateData(List<CharacterLiteEntity> result) {
-    if (result.isEmpty) {
-      state = PaginationState.data(_items);
-    } else {
-      state = PaginationState.data(_items..addAll(result));
-    }
+  void updateData(List<CharacterLiteEntity> result, bool isEnd) {
+    state = PaginationState.data(_items..addAll(result));
   }
 
   Future<void> getCharacters() async {
@@ -37,7 +32,7 @@ class CharactersListController
     res.fold((l) {
       state = PaginationState.error(l.toString(), StackTrace.current);
     }, (r) {
-      updateData(r.results);
+      updateData(r.results, page >= r.info.pages);
     });
   }
 
@@ -63,7 +58,7 @@ class CharactersListController
     res.fold((l) {
       state = PaginationState.error(l.toString(), StackTrace.current);
     }, (r) {
-      updateData(r.results);
+      updateData(r.results, page >= r.info.pages);
     });
   }
 }

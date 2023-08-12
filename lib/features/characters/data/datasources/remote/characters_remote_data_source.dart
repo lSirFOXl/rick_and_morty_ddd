@@ -1,18 +1,17 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:rick_and_morty_ddd/configs/providers.dart';
+import 'package:rick_and_morty_ddd/features/characters/data/datasources/characters_data_source_interface.dart';
+import 'package:rick_and_morty_ddd/features/characters/data/datasources/local/characters_local_data_source.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/character_entity.dart';
 import 'package:rick_and_morty_ddd/features/characters/domain/entities/characters_list_entity.dart';
-import 'package:rick_and_morty_ddd/features/characters/domain/repositories/character_repository_interface.dart';
 import 'package:rick_and_morty_ddd/features/common/domain/failures/failure.dart';
 
 ///
-class CharacterRepository implements CharacterRepositoryInterface {
-  final http.Client client;
-
-  CharacterRepository({required this.client});
+class CharactersRemoteDataSource implements CharactersDataSourceInterface {
+  CharactersRemoteDataSource();
 
   @override
   Future<Either<Failure, CharactersListEntity>> getCharacters(
@@ -22,7 +21,10 @@ class CharacterRepository implements CharacterRepositoryInterface {
         .get(url, queryParameters: {"page": page, "name": name});
 
     if (response.statusCode == 200) {
-      return right(CharactersListEntity.fromJson(response.data));
+      CharactersListEntity results =
+          CharactersListEntity.fromJson(response.data);
+
+      return right(results);
     } else {
       return left(const Failure.badRequest());
     }
